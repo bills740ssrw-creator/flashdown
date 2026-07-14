@@ -10,6 +10,11 @@
   --amber: #C98A1F;
   --amber-soft: #F0DDB2;
   --green: #2F7A52;
+  --green-soft: #CFE8DA;
+  --blue: #3B6EA5;
+  --blue-soft: #D3E1EE;
+  --red: #B8493F;
+  --red-soft: #F0D8D4;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --radius: 3px;
@@ -114,6 +119,11 @@ h1 {
 }
 
 .pane { display: flex; flex-direction: column; position: relative; }
+.pane::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 1;
+}
+.pane-in::before { background: var(--amber); }
+.pane-out::before { background: var(--green); }
 .pane-in { border-right: 1px solid var(--rule); cursor: pointer; transition: box-shadow .18s; }
 .pane-in:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
 .pane-in.dragover {
@@ -125,7 +135,9 @@ h1 {
   font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ink-faint);
   display: flex; align-items: center; justify-content: space-between;
 }
-.pane-label span { padding: 2px 8px; background: var(--paper-deep); border-radius: 3px; }
+.pane-in .pane-label span { background: var(--amber); color: var(--paper-panel); font-weight: 700; }
+.pane-out .pane-label span { background: var(--green); color: var(--paper-panel); font-weight: 700; }
+.pane-label span { padding: 3px 10px; border-radius: 4px; letter-spacing: 0.06em; }
 .pane-tools { display: flex; align-items: center; gap: 10px; }
 .stat { font-size: 11px; color: var(--ink-faint); text-transform: none; letter-spacing: 0.02em; }
 .icon-btn {
@@ -150,9 +162,16 @@ h1 {
 .pane-in.dragover .drop-content { transform: scale(1.035); }
 .paper-stack { width: 84px; height: auto; transition: transform .18s; }
 .pane-in.dragover .paper-stack { transform: translateY(-3px) rotate(-2deg); }
-.drop-instruction { margin: 0; font-size: 15.5px; }
-.drop-instruction strong { font-family: var(--mono); font-weight: 600; }
-.drop-formats { margin: 0; font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); }
+.drop-instruction { margin: 0; font-size: 16.5px; color: var(--ink); }
+.drop-instruction strong { font-family: var(--mono); font-weight: 700; color: var(--amber); }
+.drop-formats { margin: 0; display: flex; gap: 8px; }
+.drop-formats span {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 700; letter-spacing: 0.03em;
+  padding: 3px 9px; border-radius: 4px; color: var(--paper-panel);
+}
+.drop-formats .fmt-pdf { background: var(--red); }
+.drop-formats .fmt-docx { background: var(--blue); }
+.drop-formats .fmt-txt { background: var(--green); }
 
 .file-loaded { flex: 1; display: flex; align-items: center; justify-content: center; padding: 30px; }
 .file-chip { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 14px; }
@@ -206,7 +225,9 @@ h1 {
 @keyframes dotpulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 .editor { flex: 1; display: flex; position: relative; overflow: hidden; }
-.editor-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); text-align: center; font-size: 15px; }
+.editor-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--ink-soft); text-align: center; font-size: 15px; }
+.editor-empty p { margin: 0; }
+.editor-empty strong { color: var(--green); font-family: var(--mono); }
 .editor-body { display: flex; width: 100%; min-width: 0; }
 .gutter {
   font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint);
@@ -219,6 +240,12 @@ h1 {
   margin: 0; padding: 18px; white-space: pre-wrap; word-break: break-word;
   overflow-y: auto; overflow-x: hidden; max-height: 340px; flex: 1; min-width: 0;
 }
+.md-heading { color: var(--amber); font-weight: 700; }
+.md-bullet { color: var(--green); font-weight: 700; }
+.md-code-inline { color: var(--blue); background: var(--blue-soft); border-radius: 3px; padding: 0 3px; }
+.md-link { color: var(--blue); }
+.md-bold { color: var(--ink); font-weight: 700; }
+.md-rule { color: var(--red); }
 .editor-actions { display: flex; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--rule); background: var(--paper-panel); flex-wrap: wrap; }
 
 .btn {
