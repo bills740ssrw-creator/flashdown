@@ -78,7 +78,7 @@ code {
 .nav-cta:hover { background: #E0A53A; transform: translateY(-1px); }
 
 /* ---------- hero ---------- */
-.hero { padding: 72px 28px 40px; position: relative; z-index: 1; }
+.hero { padding: 32px 28px 40px; position: relative; z-index: 1; }
 .hero-copy { max-width: 640px; margin-bottom: 44px; }
 .eyebrow {
   font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em;
