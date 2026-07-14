@@ -105,7 +105,7 @@
 
   copyBtn.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(codeOutput.textContent);
+      await navigator.clipboard.writeText(codeOutput.dataset.raw || codeOutput.textContent);
       copyBtn.textContent = 'Copied ✓';
       showToast('Markdown copied to clipboard.', 'success', 2200);
       setTimeout(() => (copyBtn.textContent = 'Copy Markdown'), 1600);
@@ -115,7 +115,7 @@
   });
 
   downloadBtn.addEventListener('click', () => {
-    const blob = new Blob([codeOutput.textContent], { type: 'text/markdown' });
+    const blob = new Blob([codeOutput.dataset.raw || codeOutput.textContent], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -146,6 +146,7 @@
     paneOut.classList.remove('fullscreen');
     setStep('waiting');
     codeOutput.textContent = '';
+    delete codeOutput.dataset.raw;
     gutter.innerHTML = '';
   }
 
@@ -189,9 +190,37 @@
     }
   }
 
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+  }
+
+  function highlightMarkdown(text) {
+    return text.split('\n').map(line => {
+      let escaped = escapeHtml(line);
+
+      const headingMatch = escaped.match(/^(#{1,6}\s.*)$/);
+      if (headingMatch) return `<span class="md-heading">${headingMatch[1]}</span>`;
+
+      if (/^---+$/.test(escaped.trim())) return `<span class="md-rule">${escaped}</span>`;
+
+      const bulletMatch = escaped.match(/^(\s*)([-*])(\s.*)$/);
+      if (bulletMatch) {
+        escaped = `${bulletMatch[1]}<span class="md-bullet">${bulletMatch[2]}</span>${bulletMatch[3]}`;
+      }
+
+      escaped = escaped
+        .replace(/`([^`]+)`/g, '<span class="md-code-inline">`$1`</span>')
+        .replace(/\*\*([^*]+)\*\*/g, '<span class="md-bold">**$1**</span>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '[$1](<span class="md-link">$2</span>)');
+
+      return escaped;
+    }).join('\n');
+  }
+
   function showResult(markdown) {
     const finalText = markdown.trim() + '\n';
-    codeOutput.textContent = finalText;
+    codeOutput.dataset.raw = finalText;
+    codeOutput.innerHTML = highlightMarkdown(finalText);
     const lineCount = finalText.split('\n').length;
     gutter.innerHTML = Array.from({ length: lineCount }, (_, i) => i + 1).join('\n');
 
