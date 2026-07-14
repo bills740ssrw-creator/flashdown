@@ -3,22 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flashdown — Turn any file into Markdown, instantly</title>
-<meta name="description" content="Drop a PDF, DOCX, or TXT file and get clean Markdown back in seconds. Nothing leaves your browser.">
-<meta property="og:title" content="Flashdown — Turn any file into Markdown, instantly">
-<meta property="og:description" content="Drop a PDF, DOCX, or TXT file and get clean Markdown back in seconds. Nothing leaves your browser.">
+<title>PDF, DOCX & TXT to Markdown Converter | Flashdown</title>
+<meta name="description" content="Convert PDF, DOCX & TXT to clean Markdown instantly. Free, browser-based, nothing uploaded. Try it now.">
+<meta property="og:title" content="PDF, DOCX & TXT to Markdown Converter | Flashdown">
+<meta property="og:description" content="Convert PDF, DOCX & TXT to clean Markdown instantly. Free, browser-based, nothing uploaded. Try it now.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://flashdown.co.in">
 <meta property="og:image" content="https://flashdown.co.in/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Flashdown — Turn any file into Markdown, instantly">
-<meta name="twitter:description" content="Drop a PDF, DOCX, or TXT file and get clean Markdown back in seconds. Nothing leaves your browser.">
+<meta name="twitter:title" content="PDF, DOCX & TXT to Markdown Converter | Flashdown">
+<meta name="twitter:description" content="Convert PDF, DOCX & TXT to clean Markdown instantly. Free, browser-based, nothing uploaded. Try it now.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="canonical" href="https://flashdown.co.in">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is there a file size limit?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only what your browser's memory allows — typically fine well past 50MB. Very large scanned PDFs may take a few seconds longer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will scanned (image-only) PDFs work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not yet. Flashdown extracts existing text layers — it doesn't do OCR on scanned images. That's on the roadmap."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it keep tables and images?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "DOCX tables convert to Markdown tables. Images are referenced but not embedded, since Markdown can't carry binary data inline."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my document stored anywhere?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. There's no server in the loop, so there's nothing to store. Close the tab and it's gone."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Flashdown",
+  "url": "https://flashdown.co.in",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any (browser-based)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 </head>
 <body>
 
