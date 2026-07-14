@@ -65,7 +65,7 @@ code {
   display: flex; align-items: center; justify-content: space-between;
   height: 64px;
 }
-.logo { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 600; font-size: 20px; }
+.logo { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 600; font-size: 24px; }
 .logo-mark { color: var(--amber); font-weight: 700; display: inline-block; transform: rotate(25deg); }
 .header-nav { display: flex; align-items: center; gap: 28px; font-family: var(--mono); font-size: 14px; }
 .header-nav a { text-decoration: none; color: var(--ink-soft); border-bottom: 1px solid transparent; transition: color .15s, border-color .15s; }
@@ -313,7 +313,7 @@ details p { color: var(--ink-soft); margin: 12px 0 4px; font-size: 15.5px; max-w
 
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--rule); padding: 28px 0; }
-.footer-inner { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; color: var(--ink-faint); }
+.footer-inner { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 15px; color: var(--ink-faint); }
 .footer-inner .logo-mark { color: var(--amber); font-weight: 700; }
 .footer-inner p { margin: 0; }
 
