@@ -12,15 +12,12 @@
   const stepsList = document.getElementById('steps');
   const paneOut = document.getElementById('paneOut');
   const editorEmpty = document.getElementById('editorEmpty');
-  const editorBody = document.getElementById('editorBody');
-  const gutter = document.getElementById('gutter');
-  const codeOutput = document.getElementById('codeOutput');
+  const previewBody = document.getElementById('previewBody');
   const editorActions = document.getElementById('editorActions');
   const copyBtn = document.getElementById('copyBtn');
   const downloadBtn = document.getElementById('downloadBtn');
   const resetBtn = document.getElementById('resetBtn');
   const statCount = document.getElementById('statCount');
-  const fullscreenBtn = document.getElementById('fullscreenBtn');
   const toastStack = document.getElementById('toastStack');
 
   if (window.pdfjsLib) {
@@ -34,7 +31,12 @@
     bulletListMarker: '-'
   }) : null;
 
+  if (window.marked) {
+    marked.setOptions({ breaks: true, gfm: true });
+  }
+
   let currentBaseName = 'converted';
+  let currentMarkdown = '';
 
   // ---------- toasts ----------
   function showToast(message, type = 'info', duration = 4200) {
@@ -105,7 +107,7 @@
 
   copyBtn.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(codeOutput.dataset.raw || codeOutput.textContent);
+      await navigator.clipboard.writeText(currentMarkdown);
       copyBtn.textContent = 'Copied ✓';
       showToast('Markdown copied to clipboard.', 'success', 2200);
       setTimeout(() => (copyBtn.textContent = 'Copy Markdown'), 1600);
@@ -115,7 +117,7 @@
   });
 
   downloadBtn.addEventListener('click', () => {
-    const blob = new Blob([codeOutput.dataset.raw || codeOutput.textContent], { type: 'text/markdown' });
+    const blob = new Blob([currentMarkdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -125,40 +127,17 @@
     showToast(`Downloaded ${currentBaseName}.md`, 'success', 2200);
   });
 
-  const fullscreenBackdrop = document.getElementById('fullscreenBackdrop');
-
-  function setFullscreen(on) {
-    paneOut.classList.toggle('fullscreen', on);
-    fullscreenBackdrop.classList.toggle('active', on);
-    document.body.classList.toggle('fullscreen-lock', on);
-  }
-
-  fullscreenBtn.addEventListener('click', () => {
-    setFullscreen(!paneOut.classList.contains('fullscreen'));
-  });
-  fullscreenBackdrop.addEventListener('click', () => setFullscreen(false));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && paneOut.classList.contains('fullscreen')) {
-      setFullscreen(false);
-    }
-  });
-
   function resetUI() {
     fileInput.value = '';
     dropContent.hidden = false;
     fileLoaded.hidden = true;
     editorEmpty.hidden = false;
-    editorBody.hidden = true;
+    previewBody.hidden = true;
     editorActions.hidden = true;
     statCount.hidden = true;
-    fullscreenBtn.hidden = true;
-    paneOut.classList.remove('fullscreen');
-    fullscreenBackdrop.classList.remove('active');
-    document.body.classList.remove('fullscreen-lock');
     setStep('waiting');
-    codeOutput.textContent = '';
-    delete codeOutput.dataset.raw;
-    gutter.innerHTML = '';
+    currentMarkdown = '';
+    previewBody.innerHTML = '';
   }
 
   // ---------- main handler ----------
@@ -201,48 +180,29 @@
     }
   }
 
-  function escapeHtml(str) {
-    return str.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
-  }
-
-  function highlightMarkdown(text) {
-    return text.split('\n').map(line => {
-      let escaped = escapeHtml(line);
-
-      const headingMatch = escaped.match(/^(#{1,6}\s.*)$/);
-      if (headingMatch) return `<span class="md-heading">${headingMatch[1]}</span>`;
-
-      if (/^---+$/.test(escaped.trim())) return `<span class="md-rule">${escaped}</span>`;
-
-      const bulletMatch = escaped.match(/^(\s*)([-*])(\s.*)$/);
-      if (bulletMatch) {
-        escaped = `${bulletMatch[1]}<span class="md-bullet">${bulletMatch[2]}</span>${bulletMatch[3]}`;
-      }
-
-      escaped = escaped
-        .replace(/`([^`]+)`/g, '<span class="md-code-inline">`$1`</span>')
-        .replace(/\*\*([^*]+)\*\*/g, '<span class="md-bold">**$1**</span>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '[$1](<span class="md-link">$2</span>)');
-
-      return escaped;
-    }).join('\n');
-  }
-
   function showResult(markdown) {
     const finalText = markdown.trim() + '\n';
-    codeOutput.dataset.raw = finalText;
-    codeOutput.innerHTML = highlightMarkdown(finalText);
-    const lineCount = finalText.split('\n').length;
-    gutter.innerHTML = Array.from({ length: lineCount }, (_, i) => i + 1).join('\n');
+    currentMarkdown = finalText;
+
+    if (window.marked) {
+      previewBody.innerHTML = marked.parse(finalText);
+    } else {
+      // Fallback if marked failed to load from CDN — plain text, still usable.
+      const pre = document.createElement('pre');
+      pre.style.whiteSpace = 'pre-wrap';
+      pre.style.fontFamily = 'var(--mono)';
+      pre.textContent = finalText;
+      previewBody.innerHTML = '';
+      previewBody.appendChild(pre);
+    }
 
     const words = finalText.trim().split(/\s+/).filter(Boolean).length;
     const chars = finalText.length;
     statCount.textContent = `${words.toLocaleString()} words · ${chars.toLocaleString()} chars`;
     statCount.hidden = false;
-    fullscreenBtn.hidden = false;
 
     editorEmpty.hidden = true;
-    editorBody.hidden = false;
+    previewBody.hidden = false;
     editorActions.hidden = false;
     setStep('done');
     showToast('Converted successfully.', 'success', 2600);
