@@ -68,9 +68,9 @@
 
   // ---------- file icons ----------
   const ICONS = {
-    pdf: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
-    docx: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 14l1.2 3 1.2-3 1.2 3 1.2-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>',
-    txt: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 13h6M9 16h6M9 19h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>'
+    pdf: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 17v-4h1.3a1.4 1.4 0 0 1 0 2.8H8.5M13 17v-4h1.6a1.2 1.2 0 0 1 0 4H13v-2h1.4M18 13h-1.8v4M16.2 15h1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>',
+    docx: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.5 13l1.3 4 1.4-4 1.4 4 1.3-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>',
+    txt: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.5 13h6M7.5 15.5h6M7.5 18h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'
   };
   function setFileIcon(ext) {
     fileIconSvg.innerHTML = ICONS[ext] || ICONS.pdf;
@@ -172,9 +172,11 @@
     fileName.textContent = file.name;
     fileSize.textContent = formatSize(file.size);
 
+    const tick = () => new Promise(r => requestAnimationFrame(r));
+
     try {
       if (signal.aborted) return;
-      setStep('reading');
+      setStep('reading'); await tick();
       setStep('parsing');
 
       let markdown = '';
@@ -187,7 +189,7 @@
       }
 
       if (signal.aborted) return;
-      setStep('writing');
+      setStep('writing'); await tick();
       showResult(markdown);
     } catch (err) {
       if (err.name === 'AbortError') return;
