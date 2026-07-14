@@ -316,7 +316,7 @@ details p { color: var(--ink-soft); margin: 12px 0 4px; font-size: 15.5px; max-w
 .footer-inner { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 15px; color: var(--ink-faint); }
 .footer-inner .logo-mark { color: var(--amber); font-weight: 700; }
 .footer-inner p { margin: 0; }
-.footer-legal { margin-left: auto; color: var(--ink-faint); text-decoration: none; font-size: 12px; border-bottom: 1px solid transparent; transition: color .15s, border-color .15s; }
+.footer-legal { margin-left: auto; color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 600; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 5px; transition: color .15s, border-color .15s; }
 .footer-legal:hover { color: var(--ink); border-color: var(--amber); }
 
 /* ---------- responsive ---------- */
