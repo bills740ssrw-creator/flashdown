@@ -152,8 +152,18 @@ h1 {
   position: fixed; inset: 16px; z-index: 50; border-radius: 8px;
   box-shadow: 0 24px 64px -16px rgba(23,24,28,0.4);
   border: 1px solid var(--rule);
+  background: var(--paper-panel);
+  display: flex; flex-direction: column;
 }
-.pane-out.fullscreen .code { max-height: none; }
+.pane-out.fullscreen .code { max-height: none; background: var(--paper-panel); }
+.pane-out.fullscreen .editor { flex: 1; min-height: 0; }
+.pane-out.fullscreen .editor-body { min-height: 0; }
+.fullscreen-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 49;
+  background: rgba(23,24,28,0.45); backdrop-filter: blur(2px);
+}
+.fullscreen-backdrop.active { display: block; }
+body.fullscreen-lock { overflow: hidden; }
 
 .drop-content {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
