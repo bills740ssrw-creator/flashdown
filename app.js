@@ -125,12 +125,21 @@
     showToast(`Downloaded ${currentBaseName}.md`, 'success', 2200);
   });
 
+  const fullscreenBackdrop = document.getElementById('fullscreenBackdrop');
+
+  function setFullscreen(on) {
+    paneOut.classList.toggle('fullscreen', on);
+    fullscreenBackdrop.classList.toggle('active', on);
+    document.body.classList.toggle('fullscreen-lock', on);
+  }
+
   fullscreenBtn.addEventListener('click', () => {
-    paneOut.classList.toggle('fullscreen');
+    setFullscreen(!paneOut.classList.contains('fullscreen'));
   });
+  fullscreenBackdrop.addEventListener('click', () => setFullscreen(false));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && paneOut.classList.contains('fullscreen')) {
-      paneOut.classList.remove('fullscreen');
+      setFullscreen(false);
     }
   });
 
@@ -144,6 +153,8 @@
     statCount.hidden = true;
     fullscreenBtn.hidden = true;
     paneOut.classList.remove('fullscreen');
+    fullscreenBackdrop.classList.remove('active');
+    document.body.classList.remove('fullscreen-lock');
     setStep('waiting');
     codeOutput.textContent = '';
     delete codeOutput.dataset.raw;
