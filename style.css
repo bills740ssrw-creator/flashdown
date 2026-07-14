@@ -365,3 +365,46 @@ details p { color: var(--ink-soft); margin: 12px 0 4px; font-size: 15.5px; max-w
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
+
+/* ---------- dark mode ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #18181C;
+    --paper-deep: #202024;
+    --paper-panel: #28282E;
+    --rule: #38383E;
+    --ink: #EBE9E1;
+    --ink-soft: #9A9A9E;
+    --ink-faint: #6A6A6E;
+    --amber: #D4A043;
+    --amber-soft: #3A2E18;
+    --green: #4CAF6E;
+    --green-soft: #1C3024;
+    --blue: #6E9ED4;
+    --blue-soft: #1C2A3A;
+    --red: #D46A60;
+    --red-soft: #3A1C1A;
+  }
+
+  .grain {
+    opacity: 0.06;
+    mix-blend-mode: screen;
+  }
+
+  .site-header {
+    background: rgba(24,24,28,0.92);
+  }
+
+  .bench {
+    box-shadow: 0 2px 0 rgba(0,0,0,0.3), 0 32px 56px -20px rgba(0,0,0,0.6);
+  }
+  .bench:hover {
+    box-shadow: 0 2px 0 rgba(0,0,0,0.3), 0 36px 64px -20px rgba(0,0,0,0.65), 0 8px 20px -4px rgba(212,160,67,0.15);
+  }
+
+  .toast {
+    background: var(--paper-panel);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+}

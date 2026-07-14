@@ -37,6 +37,7 @@
 
   let currentBaseName = 'converted';
   let currentMarkdown = '';
+  let currentAbort = null;
 
   // ---------- toasts ----------
   function showToast(message, type = 'info', duration = 4200) {
@@ -65,17 +66,14 @@
     seam.classList.toggle('done', stepKey === 'done');
   }
 
-  function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
-
   // ---------- file icons ----------
   const ICONS = {
-    pdf: 'M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z',
-    docx: 'M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z',
-    txt: 'M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z'
+    pdf: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+    docx: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 14l1.2 3 1.2-3 1.2 3 1.2-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    txt: '<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 2v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 13h6M9 16h6M9 19h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>'
   };
-  function setFileIcon() {
-    // Same base document glyph for all supported types today — kept simple and legible at 18px.
-    fileIconSvg.querySelector('path').setAttribute('d', ICONS.pdf);
+  function setFileIcon(ext) {
+    fileIconSvg.innerHTML = ICONS[ext] || ICONS.pdf;
   }
 
   function formatSize(bytes) {
@@ -103,16 +101,22 @@
     if (file) handleFile(file);
   });
 
-  resetBtn.addEventListener('click', resetUI);
+  resetBtn.addEventListener('click', () => {
+    if (currentAbort) {
+      currentAbort.abort();
+      currentAbort = null;
+    }
+    resetUI();
+  });
 
   copyBtn.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(currentMarkdown);
-      copyBtn.textContent = 'Copied ✓';
+      copyBtn.textContent = 'Copied \u2713';
       showToast('Markdown copied to clipboard.', 'success', 2200);
       setTimeout(() => (copyBtn.textContent = 'Copy Markdown'), 1600);
     } catch {
-      showToast('Could not access clipboard — select the text manually.', 'error');
+      showToast('Could not access clipboard \u2014 select the text manually.', 'error');
     }
   });
 
@@ -142,38 +146,46 @@
 
   // ---------- main handler ----------
   async function handleFile(file) {
+    if (currentAbort) {
+      currentAbort.abort();
+      currentAbort = null;
+    }
+    currentAbort = new AbortController();
+    const signal = currentAbort.signal;
+
     const ext = file.name.split('.').pop().toLowerCase();
     const supported = ['pdf', 'docx', 'txt'];
     if (!supported.includes(ext)) {
-      showToast(`.${ext} isn't supported yet — try a PDF, DOCX, or TXT file.`, 'error');
+      showToast(`.${ext} isn't supported yet \u2014 try a PDF, DOCX, or TXT file.`, 'error');
       return;
     }
 
     currentBaseName = file.name.replace(/\.[^.]+$/, '');
     dropContent.hidden = true;
     fileLoaded.hidden = false;
-    setFileIcon();
+    setFileIcon(ext);
     fileName.textContent = file.name;
     fileSize.textContent = formatSize(file.size);
 
     try {
+      if (signal.aborted) return;
       setStep('reading');
-      await wait(220);
       setStep('parsing');
 
       let markdown = '';
       if (ext === 'docx') {
-        markdown = await convertDocx(file);
+        markdown = await convertDocx(file, signal);
       } else if (ext === 'pdf') {
-        markdown = await convertPdf(file);
+        markdown = await convertPdf(file, signal);
       } else if (ext === 'txt') {
-        markdown = await convertTxt(file);
+        markdown = await convertTxt(file, signal);
       }
 
+      if (signal.aborted) return;
       setStep('writing');
-      await wait(180);
       showResult(markdown);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error(err);
       setStep('waiting');
       showToast('Something went wrong reading that file. Try a different one, or check it isn\u2019t password-protected.', 'error', 5000);
@@ -187,7 +199,6 @@
     if (window.marked) {
       previewBody.innerHTML = marked.parse(finalText);
     } else {
-      // Fallback if marked failed to load from CDN — plain text, still usable.
       const pre = document.createElement('pre');
       pre.style.whiteSpace = 'pre-wrap';
       pre.style.fontFamily = 'var(--mono)';
@@ -198,7 +209,7 @@
 
     const words = finalText.trim().split(/\s+/).filter(Boolean).length;
     const chars = finalText.length;
-    statCount.textContent = `${words.toLocaleString()} words · ${chars.toLocaleString()} chars`;
+    statCount.textContent = `${words.toLocaleString()} words \u00B7 ${chars.toLocaleString()} chars`;
     statCount.hidden = false;
 
     editorEmpty.hidden = true;
@@ -209,17 +220,21 @@
   }
 
   // ---------- DOCX ----------
-  async function convertDocx(file) {
+  async function convertDocx(file, signal) {
+    if (typeof mammoth === 'undefined' || !mammoth) throw new Error('mammoth library failed to load \u2014 check your connection and refresh');
+    if (!turndownService) throw new Error('turndown library failed to load \u2014 check your connection and refresh');
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     const arrayBuffer = await file.arrayBuffer();
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     const result = await mammoth.convertToHtml({ arrayBuffer });
     const html = result.value;
-    if (!turndownService) throw new Error('turndown not loaded');
     return turndownService.turndown(html);
   }
 
   // ---------- TXT ----------
-  async function convertTxt(file) {
+  async function convertTxt(file, signal) {
     const text = await file.text();
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     return text
       .replace(/\r\n/g, '\n')
       .replace(/[ \t]+\n/g, '\n')
@@ -228,21 +243,25 @@
   }
 
   // ---------- PDF ----------
-  async function convertPdf(file) {
+  async function convertPdf(file, signal) {
+    if (typeof pdfjsLib === 'undefined' || !pdfjsLib) throw new Error('pdf.js library failed to load \u2014 check your connection and refresh');
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     const arrayBuffer = await file.arrayBuffer();
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     const pageBlocks = [];
 
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
       const page = await pdf.getPage(pageNum);
       const content = await page.getTextContent();
       const items = content.items.filter(i => i.str.trim().length > 0);
       if (items.length === 0) continue;
 
-      // group items into lines by rounded y position
       const lines = [];
       let currentLine = null;
-      const Y_TOLERANCE = 3;
+      const Y_TOLERANCE = 5;
 
       items.forEach(item => {
         const y = item.transform[5];
@@ -255,10 +274,8 @@
         }
       });
 
-      // sort lines top-to-bottom (pdf.js y grows upward)
       lines.sort((a, b) => b.y - a.y);
 
-      // build line text + track font size + vertical gaps
       const built = lines.map((line, idx) => {
         line.items.sort((a, b) => a.transform[4] - b.transform[4]);
         const text = line.items.map(i => i.str).join(' ').replace(/\s+/g, ' ').trim();
@@ -289,6 +306,10 @@
           text = `### ${text}`;
         } else if (/^[•▪◦●]\s?/.test(text)) {
           text = text.replace(/^[•▪◦●]\s?/, '- ');
+        } else if (/^\d+[.)]\s/.test(text)) {
+          // numbered list, already valid markdown
+        } else if (text === text.toUpperCase() && text.trim().length > 3 && text.trim().length < 80) {
+          text = `## ${text}`;
         }
 
         if (isNewParagraph && outLines.length > 0) outLines.push('');
