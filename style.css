@@ -336,6 +336,7 @@ details p { color: var(--ink-soft); margin: 12px 0 4px; font-size: 15.5px; max-w
   .pane-label { padding: 11px 16px; }
   .editor-actions { padding: 12px 14px; }
   .hero-note { display: none; }
+  .logo-mark { transform: rotate(12deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
