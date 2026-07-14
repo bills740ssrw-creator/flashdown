@@ -146,12 +146,10 @@
 
   // ---------- main handler ----------
   async function handleFile(file) {
-    if (currentAbort) {
-      currentAbort.abort();
-      currentAbort = null;
+    if (!file || file.size === 0) {
+      showToast('That file appears to be empty \u2014 try a different one.', 'error');
+      return;
     }
-    currentAbort = new AbortController();
-    const signal = currentAbort.signal;
 
     const ext = file.name.split('.').pop().toLowerCase();
     const supported = ['pdf', 'docx', 'txt'];
@@ -159,6 +157,13 @@
       showToast(`.${ext} isn't supported yet \u2014 try a PDF, DOCX, or TXT file.`, 'error');
       return;
     }
+
+    if (currentAbort) {
+      currentAbort.abort();
+      currentAbort = null;
+    }
+    currentAbort = new AbortController();
+    const signal = currentAbort.signal;
 
     currentBaseName = file.name.replace(/\.[^.]+$/, '');
     dropContent.hidden = true;
@@ -197,14 +202,13 @@
     currentMarkdown = finalText;
 
     if (window.marked) {
-      previewBody.innerHTML = marked.parse(finalText);
+      try {
+        previewBody.innerHTML = marked.parse(finalText);
+      } catch {
+        fallbackRender(finalText);
+      }
     } else {
-      const pre = document.createElement('pre');
-      pre.style.whiteSpace = 'pre-wrap';
-      pre.style.fontFamily = 'var(--mono)';
-      pre.textContent = finalText;
-      previewBody.innerHTML = '';
-      previewBody.appendChild(pre);
+      fallbackRender(finalText);
     }
 
     const words = finalText.trim().split(/\s+/).filter(Boolean).length;
@@ -217,6 +221,15 @@
     editorActions.hidden = false;
     setStep('done');
     showToast('Converted successfully.', 'success', 2600);
+  }
+
+  function fallbackRender(text) {
+    const pre = document.createElement('pre');
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.style.fontFamily = 'var(--mono)';
+    pre.textContent = text;
+    previewBody.innerHTML = '';
+    previewBody.appendChild(pre);
   }
 
   // ---------- DOCX ----------
@@ -254,8 +267,13 @@
 
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
-      const page = await pdf.getPage(pageNum);
-      const content = await page.getTextContent();
+      let page, content;
+      try {
+        page = await pdf.getPage(pageNum);
+        content = await page.getTextContent();
+      } catch {
+        continue;
+      }
       const items = content.items.filter(i => i.str.trim().length > 0);
       if (items.length === 0) continue;
 
