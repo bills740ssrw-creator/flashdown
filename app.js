@@ -190,7 +190,7 @@
 
       if (signal.aborted) return;
       setStep('writing'); await tick();
-      showResult(markdown, ext);
+      showResult(markdown, ext, file.size);
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error(err);
@@ -199,14 +199,14 @@
     }
   }
 
-  function showResult(markdown, ext = 'unknown') {
+  function showResult(markdown, ext = 'unknown', fileSize = 0) {
     const finalText = markdown.trim() + '\n';
     currentMarkdown = finalText;
 
     if (typeof gtag === 'function') {
       gtag('event', 'file_converted', {
         file_format: ext,
-        file_size_kb: Math.round(file.size / 1024)
+        file_size_kb: Math.round(fileSize / 1024)
       });
     }
 
