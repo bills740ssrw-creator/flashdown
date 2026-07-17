@@ -190,7 +190,7 @@
 
       if (signal.aborted) return;
       setStep('writing'); await tick();
-      showResult(markdown);
+      showResult(markdown, ext);
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error(err);
@@ -199,9 +199,16 @@
     }
   }
 
-  function showResult(markdown) {
+  function showResult(markdown, ext = 'unknown') {
     const finalText = markdown.trim() + '\n';
     currentMarkdown = finalText;
+
+    if (typeof gtag === 'function') {
+      gtag('event', 'file_converted', {
+        file_format: ext,
+        file_size_kb: Math.round(file.size / 1024)
+      });
+    }
 
     if (window.marked) {
       try {
