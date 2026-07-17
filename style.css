@@ -261,6 +261,9 @@ h1 {
 .btn-ghost:hover { border-color: var(--ink); }
 
 .hero-note { margin: 18px 4px 0; font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); }
+.hero-cta { text-align: center; margin: 0 0 20px; font-family: var(--mono); font-size: 14px; }
+.cta-link { color: var(--amber); text-decoration: none; font-weight: 600; border-bottom: 1.5px solid transparent; transition: border-color .15s; }
+.cta-link:hover { border-bottom-color: var(--amber); }
 
 /* ---------- formats ---------- */
 .section-head { max-width: 560px; margin-bottom: 36px; }
